@@ -178,10 +178,7 @@ public class View
 	}
 	
 	public void initWindow()
-	{
-		//static panel
-		
-		
+	{		
 		//gain or lose
 		JPanel radioPanel = new JPanel();
 		JPanel selectionPanel1 = new JPanel();
@@ -211,6 +208,8 @@ public class View
 		staticPanel.setLayout(new FlowLayout());
 		staticPanel.add(radioPanel);
 		staticPanel.add(secondsPanel);
+		staticPanel.setPreferredSize(new Dimension(340, 70));
+
 		staticPanel.setVisible(false);
 		
 		
@@ -243,6 +242,7 @@ public class View
 		dynamicPanel.add(originalPanel);		
 		dynamicPanel.add(wantedPanel);
 		dynamicPanel.setLayout(new BoxLayout(dynamicPanel, BoxLayout.Y_AXIS));
+		dynamicPanel.setPreferredSize(new Dimension(340, 70));
 		dynamicPanel.setVisible(false);
 		
 		
@@ -255,7 +255,6 @@ public class View
 		openedFile.setFont(italic);
 		openedPanel.add(openedFile);
 		
-		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		
 		panel.add(openPanel);
 		panel.add(openedPanel);
@@ -266,26 +265,27 @@ public class View
 		
 		
 		window.add(panel);
-		window.setSize(300,260);
+		window.setResizable(false);
+		window.setSize(350,260);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setVisible(true);
 	}
 
 	private boolean conditionsOK()
 	{
-		
 		boolean isOk = false;
 		switch (convertType)
 		{
 		case STATIC:
-			isOk = (gain.isSelected() || lose.isSelected()) 
+			isOk = fileHandler != null
+					&&	(gain.isSelected() || lose.isSelected()) 
 					&& (fileHandler.getInputFile() != null) 
 					&& !("".equals(secondsField.getText())) 
 					&& fileHandler.getOutputFilePath() != null 
 					&& !("".equals(fileHandler.getOutputFilePath()));
 			break;
 		case DYNAMIC:
-			isOk = fileHandler.getInputFile() != null;
+			isOk = fileHandler !=null && fileHandler.getInputFile() != null;
 			break;
 		default:
 			break;
