@@ -1,6 +1,5 @@
 import javax.swing.*;
 
-import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.*;
 import java.io.BufferedReader;
@@ -34,8 +33,6 @@ public class View
 	private JFormattedTextField wantedFrameRate;
 	
 	private int seconds;
-	private File inputFile;
-	private String outputFileName;
 	private FileHandler fileHandler;
 	
 	public enum timeTypes
@@ -82,6 +79,7 @@ public class View
 			{
 				staticPanel.setVisible(true);
 				dynamicPanel.setVisible(false);
+				convertType = convertTypes.STATIC;
 			}
 		});
 		
@@ -90,6 +88,7 @@ public class View
 			{
 				dynamicPanel.setVisible(true);
 				staticPanel.setVisible(false);
+				convertType = convertTypes.DYNAMIC;
 			}
 		});
 		
@@ -128,12 +127,14 @@ public class View
 									timeType = gain.isSelected() ? timeTypes.GAIN : timeTypes.LOSE;
 									seconds = Integer.parseInt(secondsField.getText());
 									TimeConverter tc = new TimeConverter(line, timeType, seconds);
-									text.add(tc.convert());
+									text.add(tc.convertStatic());
 								}
 								else if (convertType == convertTypes.DYNAMIC)
 								{
-									TimeConverter tc = new TimeConverter(line, timeType, seconds);
-									text.add(tc.convert());
+									TimeConverter tc = new TimeConverter(line, 
+																		Float.parseFloat(originalFrameRate.getText()), 
+																		Float.parseFloat(wantedFrameRate.getText()));
+									text.add(tc.convertDynamic());
 								}
 							}
 							else
@@ -242,19 +243,22 @@ public class View
 	private boolean conditionsOK()
 	{
 		
-		boolean isOk = true;
+		boolean isOk = false;
 		switch (convertType)
 		{
 		case STATIC:
-			isOk = (gain.isSelected() || lose.isSelected()) && (inputFile != null) && secondsField.getText() != "" && outputFileName != null;
+			isOk = (gain.isSelected() || lose.isSelected()) 
+					&& (fileHandler.getInputFile() != null) 
+					&& !("".equals(secondsField.getText())) 
+					&& fileHandler.getOutputFilePath() != null 
+					&& !("".equals(fileHandler.getOutputFilePath()));
 			break;
 		case DYNAMIC:
-			
+			isOk = fileHandler.getInputFile() != null && !("".equals(originalFrameRate.getText())) && !("".equals(wantedFrameRate.getText()));
 			break;
 		default:
 			break;
 		}
-		
 		return isOk;
 	}
 }

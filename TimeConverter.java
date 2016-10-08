@@ -6,6 +6,8 @@ public class TimeConverter {
 	private String timeLabel;
 	private View.timeTypes timeType;
 	private int seconds;
+	private float originalFrameRate;
+	private float wantedFrameRate;
 	
 	public TimeConverter(String timeLabel, View.timeTypes timeType, int seconds)
 	{
@@ -14,7 +16,14 @@ public class TimeConverter {
 		this.seconds = seconds;
 	}
 	
-	public String convert()
+	public TimeConverter(String timeLabel, float original, float wanted)
+	{
+		this.timeLabel = timeLabel;
+		this.originalFrameRate = original;
+		this.wantedFrameRate = wanted;
+	}
+	
+	public String convertStatic()
 	{
 		if(timeType != View.timeTypes.NEITHER)
 		{
@@ -24,12 +33,8 @@ public class TimeConverter {
 			for(int i = 0; i < times.length; i++)
 			{
 				String time = "";
-				int hours 		= Integer.parseInt(times[i].split(":")[0]);	
-				int minutes 	= Integer.parseInt(times[i].split(":")[1]);	
-				int seconds 	= Integer.parseInt(times[i].split(":")[2].split(",")[0]);
+				int timeInSeconds = convertTimeToSec(times[i]);
 				int miliseconds = Integer.parseInt(times[i].split(",")[1]);
-				
-				int timeInSeconds 	= (hours * 3600) + (minutes * 60) + seconds;
 				timeInSeconds 		= timeType == View.timeTypes.GAIN ? timeInSeconds + this.seconds : timeInSeconds - this.seconds;
 				
 				if(timeInSeconds < 0)
@@ -38,9 +43,9 @@ public class TimeConverter {
 					miliseconds = 0;
 				}
 				
-				hours 	= timeInSeconds / 3600;				
-				minutes = (timeInSeconds - hours * 3600) / 60;
-				seconds = timeInSeconds - (hours * 3600) - (minutes * 60);
+				int hours 	= timeInSeconds / 3600;				
+				int minutes = (timeInSeconds - hours * 3600) / 60;
+				int seconds = timeInSeconds - (hours * 3600) - (minutes * 60);
 				
 				time 	= hours + ":" + minutes + ":" + seconds + "," + miliseconds;
 				convertedTimes.add(time);
@@ -49,5 +54,62 @@ public class TimeConverter {
 			timeLabel = String.join(" --> ", convertedTimes);
 		}
 		return timeLabel;
+	}
+	
+	public String convertDynamic()
+	{
+		String[] times = timeLabel.split(" --> ");
+		List<String> convertedTimes = new ArrayList<String>();
+		
+		for(int i = 0; i < times.length; i++)
+		{
+			String time = "";
+			int timeInMiliSeconds = convertTimeToMiliSec(times[i]);
+			float originToWantedModifier = originalFrameRate / wantedFrameRate;
+			float modifiedTime = timeInMiliSeconds * originToWantedModifier;
+			timeInMiliSeconds = Math.round(modifiedTime);
+
+			int hours = timeInMiliSeconds / 1000 / 3600;
+			int ah = timeInMiliSeconds - hours * 3600 * 1000;
+			
+			int minutes = ah / 1000 / 60;
+			int am = ah - minutes * 60 * 1000;
+			
+			int seconds = am / 1000;
+			int miliseconds = am - seconds * 1000;
+			
+			String milisecs = "";
+			if (miliseconds < 10)
+				milisecs = "00" + miliseconds;
+			else if (miliseconds < 100)
+				milisecs = "0" + miliseconds;
+			else
+				milisecs = "" + miliseconds;
+			
+			time 	= hours + ":" + minutes + ":" + seconds + "," + milisecs;
+			convertedTimes.add(time);		
+		}
+		
+		timeLabel = String.join(" --> ", convertedTimes);
+		
+		return timeLabel;
+	}
+	
+	private int convertTimeToSec(String time)
+	{
+		int hours 		= Integer.parseInt(time.split(":")[0]);	
+		int minutes 	= Integer.parseInt(time.split(":")[1]);	
+		int seconds 	= Integer.parseInt(time.split(":")[2].split(",")[0]);
+		
+		return (hours * 3600) + (minutes * 60) + seconds;
+	}
+	private int convertTimeToMiliSec(String time)
+	{
+		int hours 		= Integer.parseInt(time.split(":")[0]);	
+		int minutes 	= Integer.parseInt(time.split(":")[1]);	
+		int seconds 	= Integer.parseInt(time.split(":")[2].split(",")[0]);
+		int miliseconds = Integer.parseInt(time.split(",")[1]);
+		
+		return (hours * 3600) * 1000 + (minutes * 60) * 1000 + seconds * 1000 + miliseconds;
 	}
 }
