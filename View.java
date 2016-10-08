@@ -1,6 +1,8 @@
 import javax.swing.*;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,11 +32,25 @@ public class View
 	private JRadioButton staticConvert;
 	private JRadioButton dynamicConvert;
 	private JFormattedTextField secondsField;
-	private JFormattedTextField originalFrameRate;
-	private JFormattedTextField wantedFrameRate;
+	private JComboBox originalFrameRate;
+	private JComboBox wantedFrameRate;
+	private JLabel openedFile;
 	
 	private int seconds;
 	private FileHandler fileHandler;
+	private float[] frameRates = 
+	{
+		(float)30.000, 
+		(float)29.97, 
+		(float)25.000,
+		(float)24.000, 
+		(float)23.99, 
+		(float)23.978, 
+		(float)23.976, 
+		(float)20, 
+		(float)15.000, 
+		(float)12.000
+	};
 	
 	public enum timeTypes
 	{
@@ -49,8 +66,8 @@ public class View
 		DYNAMIC
 	} 
 	private convertTypes convertType;
-	
-	
+	private Font italic;
+
 	
 	public View()
 	{
@@ -61,7 +78,7 @@ public class View
 		startButton = new JButton("Start");
 		openFileButton = new JButton("Fájl megnyitása");		
 		inputTextChooser = new JFileChooser();
-		File defaultDir = new File("D:\\Filmek");
+		File defaultDir = new File(System.getProperty("user.home"));
 		inputTextChooser.setCurrentDirectory(defaultDir);
 		gainLoseGroup = new ButtonGroup();
 		convertTypeGroup = new ButtonGroup();
@@ -69,10 +86,18 @@ public class View
 		lose = new JRadioButton();
 		staticConvert = new JRadioButton();
 		dynamicConvert = new JRadioButton();
-		secondsField = new JFormattedTextField();
-		originalFrameRate = new JFormattedTextField();
-		wantedFrameRate = new JFormattedTextField();
+		secondsField = new JFormattedTextField(NumberFormat.getNumberInstance());
+		openedFile = new JLabel("", SwingConstants.CENTER);
+		italic  = new Font(openedFile.getFont().getName(),Font.ITALIC,openedFile.getFont().getSize());
+		originalFrameRate = new JComboBox();
+		wantedFrameRate = new JComboBox();
 		timeType = timeTypes.NEITHER;
+		
+		for(int i = 0; i < frameRates.length; ++i)
+		{
+			originalFrameRate.addItem(frameRates[i]);
+			wantedFrameRate.addItem(frameRates[i]);		
+		}
 		
 		staticConvert.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
@@ -94,7 +119,6 @@ public class View
 		
 		openFileButton.addActionListener(new ActionListener()
 		{
-
 			public void actionPerformed(ActionEvent e)
 			{
 				int returnVal = inputTextChooser.showOpenDialog(window);
@@ -102,6 +126,7 @@ public class View
 				{
 					File file = inputTextChooser.getSelectedFile();
 					fileHandler = new FileHandler(file);
+					openedFile.setText(file.getName());
 				}
 			}});
 		
@@ -132,8 +157,8 @@ public class View
 								else if (convertType == convertTypes.DYNAMIC)
 								{
 									TimeConverter tc = new TimeConverter(line, 
-																		Float.parseFloat(originalFrameRate.getText()), 
-																		Float.parseFloat(wantedFrameRate.getText()));
+																		Float.parseFloat(originalFrameRate.getSelectedItem().toString()), 
+																		Float.parseFloat(wantedFrameRate.getSelectedItem().toString()));
 									text.add(tc.convertDynamic());
 								}
 							}
@@ -204,8 +229,6 @@ public class View
 		//Dynamic panel
 		JLabel original = new JLabel("Eredeti framerate");
 		JLabel wanted = new JLabel("Kívánt framerate");
-		originalFrameRate.setColumns(4);
-		wantedFrameRate.setColumns(4);
 		JPanel originalPanel = new JPanel();
 		JPanel wantedPanel = new JPanel();
 		
@@ -213,6 +236,8 @@ public class View
 		originalPanel.add(originalFrameRate);
 		originalPanel.setLayout(new FlowLayout());
 		wantedPanel.add(wanted);
+		originalFrameRate.setSelectedIndex(0);
+		wantedFrameRate.setSelectedIndex(0);
 		wantedPanel.add(wantedFrameRate);
 		wantedPanel.setLayout(new FlowLayout());
 		dynamicPanel.add(originalPanel);		
@@ -224,10 +249,16 @@ public class View
 		JPanel startPanel = new JPanel();
 		startPanel.add(startButton);
 		JPanel openPanel = new JPanel();
+		JPanel openedPanel = new JPanel();
 		openPanel.add(openFileButton);
+		openedFile.setPreferredSize(new Dimension(1000, 20));
+		openedFile.setFont(italic);
+		openedPanel.add(openedFile);
+		
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		
 		panel.add(openPanel);
+		panel.add(openedPanel);
 		panel.add(convertTypePanel);
 		panel.add(dynamicPanel);
 		panel.add(staticPanel);
@@ -235,11 +266,11 @@ public class View
 		
 		
 		window.add(panel);
-		window.setSize(300,220);
+		window.setSize(300,260);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setVisible(true);
 	}
-	
+
 	private boolean conditionsOK()
 	{
 		
@@ -254,7 +285,7 @@ public class View
 					&& !("".equals(fileHandler.getOutputFilePath()));
 			break;
 		case DYNAMIC:
-			isOk = fileHandler.getInputFile() != null && !("".equals(originalFrameRate.getText())) && !("".equals(wantedFrameRate.getText()));
+			isOk = fileHandler.getInputFile() != null;
 			break;
 		default:
 			break;

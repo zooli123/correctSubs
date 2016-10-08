@@ -47,7 +47,7 @@ public class TimeConverter {
 				int minutes = (timeInSeconds - hours * 3600) / 60;
 				int seconds = timeInSeconds - (hours * 3600) - (minutes * 60);
 				
-				time 	= hours + ":" + minutes + ":" + seconds + "," + miliseconds;
+				time 	= formatTime(hours, minutes, seconds) + "," + miliseconds;
 				convertedTimes.add(time);
 			}
 			
@@ -86,7 +86,8 @@ public class TimeConverter {
 			else
 				milisecs = "" + miliseconds;
 			
-			time 	= hours + ":" + minutes + ":" + seconds + "," + milisecs;
+			
+			time 	= formatTime(hours, minutes, seconds) + "," + milisecs;
 			convertedTimes.add(time);		
 		}
 		
@@ -103,6 +104,7 @@ public class TimeConverter {
 		
 		return (hours * 3600) + (minutes * 60) + seconds;
 	}
+	
 	private int convertTimeToMiliSec(String time)
 	{
 		int hours 		= Integer.parseInt(time.split(":")[0]);	
@@ -111,5 +113,15 @@ public class TimeConverter {
 		int miliseconds = Integer.parseInt(time.split(",")[1]);
 		
 		return (hours * 3600) * 1000 + (minutes * 60) * 1000 + seconds * 1000 + miliseconds;
+	}
+	
+	private String formatTime(int hours, int minutes, int seconds)
+	{		
+		return format(hours) + ":" + format(minutes) + ":" + format(seconds);
+	}
+	
+	private String format(int param)
+	{
+		return param < 10 ? "0" + param : "" + param;
 	}
 }

@@ -1,14 +1,4 @@
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
 
 public class FileHandler {
 
@@ -18,12 +8,12 @@ public class FileHandler {
 	public FileHandler(File inputFile)
 	{
 		this.inputFile = inputFile;
-		this.outputFilePath = setOutputFileName();
+		this.outputFilePath = setOutputFilePath();
 	}
 
 	public FileHandler(){}
 	
-	private String setOutputFileName()
+	private String setOutputFilePath()
 	{
 		String path = this.inputFile.getPath();
 		//path of the opened file:
