@@ -47,7 +47,7 @@ public class TimeConverter {
 				int minutes = (timeInSeconds - hours * 3600) / 60;
 				int seconds = timeInSeconds - (hours * 3600) - (minutes * 60);
 				
-				time 	= formatTime(hours, minutes, seconds) + "," + miliseconds;
+				time 	= formatTime(hours, minutes, seconds, miliseconds);
 				convertedTimes.add(time);
 			}
 			
@@ -77,17 +77,8 @@ public class TimeConverter {
 			
 			int seconds = am / 1000;
 			int miliseconds = am - seconds * 1000;
-			
-			String milisecs = "";
-			if (miliseconds < 10)
-				milisecs = "00" + miliseconds;
-			else if (miliseconds < 100)
-				milisecs = "0" + miliseconds;
-			else
-				milisecs = "" + miliseconds;
-			
-			
-			time 	= formatTime(hours, minutes, seconds) + "," + milisecs;
+		
+			time 	= formatTime(hours, minutes, seconds, miliseconds);
 			convertedTimes.add(time);		
 		}
 		
@@ -115,9 +106,17 @@ public class TimeConverter {
 		return (hours * 3600) * 1000 + (minutes * 60) * 1000 + seconds * 1000 + miliseconds;
 	}
 	
-	private String formatTime(int hours, int minutes, int seconds)
+	private String formatTime(int hours, int minutes, int seconds, int miliseconds)
 	{		
-		return format(hours) + ":" + format(minutes) + ":" + format(seconds);
+		String milisecs = "";
+		if (miliseconds < 10)
+			milisecs = "00" + miliseconds;
+		else if (miliseconds < 100)
+			milisecs = "0" + miliseconds;
+		else
+			milisecs = "" + miliseconds;
+		
+		return format(hours) + ":" + format(minutes) + ":" + format(seconds) + "," + milisecs;
 	}
 	
 	private String format(int param)
