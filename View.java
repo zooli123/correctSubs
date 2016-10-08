@@ -168,7 +168,10 @@ public class View
 							}
 						}
 						Files.write(output, text, Charset.forName("UTF-8"));
-						
+						JOptionPane.showMessageDialog(window, 
+													  "Az elkészült feliratot megtalálod a " + fileHandler.getOutputFilePath().substring(0,fileHandler.getOutputFilePath().lastIndexOf(File.separator)) + " helyen.", 
+													  "Konvertálás kész!", 
+													  JOptionPane.DEFAULT_OPTION);
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
